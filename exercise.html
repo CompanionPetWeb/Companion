@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>Companion — Exercise</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  html{ color-scheme:light; }
+  :root{
+    --sky1:#BFE0F5; --sky2:#EAF4FB; --sky3:#DCEEF7;
+    --ink:#12283B; --ink-dim:#4C6478;
+    --accent:#5FAE5C; --accent-dim:#DCF2D8;
+    --mind:#4F8FE0; --mind-dim:#D7E7FB;
+    --warn:#C4664A;
+  }
+  *{margin:0; padding:0; box-sizing:border-box;}
+  body{
+    font-family:'Inter',sans-serif; color:var(--ink);
+    background:linear-gradient(180deg, var(--sky1) 0%, var(--sky3) 45%, var(--sky2) 100%);
+    min-height:100vh;
+    position:relative;
+  }
+  .bg-photo{
+    position:fixed; inset:0; width:100%; height:100%;
+    object-fit:cover; z-index:-2;
+  }
+  .bg-scrim{
+    position:fixed; inset:0; z-index:-1;
+    background:linear-gradient(180deg, rgba(191,224,245,0.82), rgba(220,238,247,0.88));
+  }
+  .display{font-family:'Space Grotesk',sans-serif;}
+
+  nav{
+    position:sticky; top:0; z-index:20;
+    display:flex; justify-content:space-between; align-items:center;
+    padding:20px 5vw; background:rgba(255,255,255,0.65); backdrop-filter:blur(10px);
+  }
+  .brand{ display:flex; align-items:center; gap:10px; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.15rem; color:var(--ink); }
+  .brand .badge{ width:36px; height:36px; border-radius:11px; background:#fff; display:flex; align-items:center; justify-content:center; font-size:1.2rem; box-shadow:0 4px 14px rgba(20,50,60,0.1); }
+  nav ul{ list-style:none; display:flex; gap:26px; }
+  nav ul li{ position:relative; }
+  nav ul a{ text-decoration:none; color:var(--ink); font-size:0.92rem; font-weight:600; }
+  nav ul li.active::after{ content:''; position:absolute; left:50%; bottom:-10px; transform:translateX(-50%); width:5px; height:5px; border-radius:50%; background:#E76B4E; }
+  .back-btn{ background:transparent; color:var(--ink); border:1.5px solid rgba(18,40,59,0.25); border-radius:100px; padding:11px 24px; font-size:0.88rem; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:8px; font-family:'Inter',sans-serif; text-decoration:none; transition:background .2s; }
+  .back-btn:hover{ background:rgba(255,255,255,0.5); }
+
+  .hero{ max-width:760px; margin:0 auto; padding:50px 5vw 10px; text-align:center; }
+  .eyebrow{ display:inline-block; background:rgba(255,255,255,0.85); color:var(--accent); padding:8px 18px; border-radius:100px; font-size:0.8rem; font-weight:700; margin-bottom:20px; box-shadow:0 4px 14px rgba(20,50,60,0.08); }
+  .hero h1{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(2rem, 4.4vw, 2.8rem); line-height:1.1; margin-bottom:14px; }
+  .hero p{ color:var(--ink-dim); font-size:1rem; line-height:1.6; max-width:56ch; margin:0 auto; }
+
+  .builder-wrap{ max-width:820px; margin:36px auto 0; padding:0 5vw; }
+  .builder-card{ background:rgba(255,255,255,0.9); border-radius:26px; padding:28px 32px; box-shadow:0 16px 40px rgba(20,50,60,0.1); }
+  .builder-card h3{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.05rem; margin-bottom:16px; }
+  .builder-row{ display:flex; flex-direction:column; gap:20px; }
+  .b-field{ width:100%; }
+  .b-field label{ display:block; font-size:0.78rem; font-weight:600; color:var(--ink-dim); margin-bottom:8px; }
+  .opt-row{ display:flex; gap:8px; max-width:420px; }
+  .opt{
+    flex:1; padding:11px 8px; border-radius:12px; border:1.5px solid #E2E8ED;
+    background:#fff; text-align:center; cursor:pointer; font-size:0.82rem; font-weight:600; color:var(--ink-dim);
+    transition:all .15s;
+  }
+  .opt:hover{ border-color:var(--accent); }
+  .opt.selected{ background:var(--accent); border-color:var(--accent); color:#fff; }
+  .builder-btn{
+    align-self:flex-start; margin-top:4px;
+    background:var(--ink); color:#fff; border:none; border-radius:12px; padding:13px 24px;
+    font-size:0.9rem; font-weight:700; cursor:pointer; font-family:'Space Grotesk',sans-serif; white-space:nowrap;
+  }
+  .builder-btn:hover{ background:#0A1C2B; }
+
+  .routine-result{ display:none; margin-top:24px; }
+  .routine-result.show{ display:block; animation:fadeUp .4s ease; }
+  @keyframes fadeUp{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+  .routine-summary{ display:flex; gap:12px; margin-bottom:20px; flex-wrap:wrap; }
+  .summary-pill{ flex:1; min-width:130px; background:var(--accent-dim); border-radius:14px; padding:14px 16px; }
+  .summary-pill.mind{ background:var(--mind-dim); }
+  .summary-pill .sv{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.3rem; color:var(--ink); }
+  .summary-pill .sl{ font-size:0.76rem; color:var(--ink-dim); }
+
+  .timeline{ display:flex; flex-direction:column; border-left:2px solid #E2E8ED; margin-left:8px; }
+  .tl-item{ position:relative; padding:0 0 28px 30px; }
+  .tl-item:last-child{ padding-bottom:0; }
+  .tl-item::before{ content:''; position:absolute; left:-7px; top:2px; width:12px; height:12px; border-radius:50%; background:#fff; border:2.5px solid var(--accent); }
+  .tl-item.mind::before{ border-color:var(--mind); }
+  .tl-time{ font-family:'Space Grotesk',sans-serif; font-size:0.76rem; color:var(--ink-dim); display:block; margin-bottom:4px; }
+  .tl-item h4{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1rem; margin-bottom:4px; }
+  .tl-item p{ color:var(--ink-dim); font-size:0.88rem; line-height:1.5; }
+
+  .jumpnav{ display:flex; flex-wrap:wrap; justify-content:center; gap:10px; max-width:900px; margin:44px auto 0; padding:0 5vw; }
+  .jumpnav a{ text-decoration:none; background:rgba(255,255,255,0.75); color:var(--ink); padding:9px 16px; border-radius:100px; font-size:0.85rem; font-weight:600; box-shadow:0 4px 14px rgba(20,50,60,0.06); }
+
+  .n-section{ max-width:900px; margin:0 auto; padding:50px 5vw 10px; scroll-margin-top:90px; }
+  .n-head{ margin-bottom:24px; }
+  .n-head .tag{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:0.78rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--accent); display:block; margin-bottom:6px; }
+  .n-head.mind .tag{ color:var(--mind); }
+  .n-head h2{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.6rem; }
+  .n-head p{ color:var(--ink-dim); font-size:0.92rem; margin-top:6px; max-width:60ch; }
+
+  .card-grid{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; }
+  .e-card{ background:rgba(255,255,255,0.88); border-radius:20px; padding:22px 22px; box-shadow:0 12px 30px rgba(20,50,60,0.07); }
+  .e-card .eicon{ width:42px; height:42px; border-radius:12px; background:var(--accent-dim); display:flex; align-items:center; justify-content:center; font-size:1.2rem; margin-bottom:12px; }
+  .e-card.mind .eicon{ background:var(--mind-dim); }
+  .e-card h4{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1rem; margin-bottom:6px; }
+  .e-card p{ font-size:0.85rem; color:var(--ink-dim); line-height:1.5; }
+  .e-card .edur{ display:inline-block; margin-top:10px; font-size:0.74rem; font-weight:700; color:var(--accent); background:var(--accent-dim); padding:4px 10px; border-radius:100px; }
+  .e-card.mind .edur{ color:var(--mind); background:var(--mind-dim); }
+
+  .caution-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .caution-card{ background:#FBEEEA; border-radius:18px; padding:20px 22px; }
+  .caution-card h4{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:0.95rem; margin-bottom:6px; color:var(--ink); display:flex; align-items:center; gap:8px; }
+  .caution-card h4::before{ content:'⚠'; color:var(--warn); }
+  .caution-card p{ font-size:0.85rem; color:#6B4A42; line-height:1.5; }
+
+  footer{ text-align:center; padding:60px 5vw 60px; color:var(--ink-dim); font-size:0.82rem; }
+
+  @media (max-width:760px){
+    .card-grid{ grid-template-columns:1fr; }
+    .caution-grid{ grid-template-columns:1fr; }
+    nav ul{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+<img class="bg-photo" src="./assets/exercise-bg.jpg" alt="">
+<div class="bg-scrim"></div>
+
+
+<nav>
+  <div class="brand"><span class="badge">🐾</span>Companion</div>
+  <ul>
+    <li><a href="./dog-islands.html">Home</a></li>
+    <li><a href="./nutrition.html">Nutrition</a></li>
+    <li><a href="./feeding-calculator.html">Calculator</a></li>
+    <li><a href="./meals.html">Meals</a></li>
+    <li class="active"><a href="./exercise.html">Exercise</a></li>
+    <li><a href="#">About Us</a></li>
+  </ul>
+  <a class="back-btn" href="./dog-islands.html">← Back</a>
+</nav>
+
+<div class="hero">
+  <span class="eyebrow">Body & Mind</span>
+  <h1>The other half of a healthy dog</h1>
+  <p>Food isn't the whole picture — daily movement and mental stimulation matter just as much. Build a routine below, or browse the full guide underneath.</p>
+</div>
+
+<div class="builder-wrap">
+  <div class="builder-card">
+    <h3>Build today's routine</h3>
+    <div class="builder-row">
+      <div class="b-field">
+        <label>Energy level</label>
+        <div class="opt-row" id="energyGroup">
+          <div class="opt" data-e="low">Low</div>
+          <div class="opt selected" data-e="moderate">Moderate</div>
+          <div class="opt" data-e="high">High</div>
+        </div>
+      </div>
+      <div class="b-field">
+        <label>Life stage</label>
+        <div class="opt-row" id="stageGroup">
+          <div class="opt" data-s="puppy">Puppy</div>
+          <div class="opt selected" data-s="adult">Adult</div>
+          <div class="opt" data-s="senior">Senior</div>
+        </div>
+      </div>
+      <button class="builder-btn" id="buildBtn">Build routine →</button>
+    </div>
+
+    <div class="routine-result" id="routineResult">
+      <div class="routine-summary">
+        <div class="summary-pill"><div class="sv" id="physMin">—</div><div class="sl">min physical / day</div></div>
+        <div class="summary-pill mind"><div class="sv" id="mindMin">—</div><div class="sl">min mental / day</div></div>
+      </div>
+      <div class="timeline" id="timelineRoot"></div>
+    </div>
+  </div>
+</div>
+
+<div class="jumpnav">
+  <a href="#physical">Physical Exercise</a>
+  <a href="#mental">Mental Enrichment</a>
+  <a href="#cautions">Life-Stage Cautions</a>
+</div>
+
+<div class="n-section" id="physical">
+  <div class="n-head">
+    <span class="tag">Body</span>
+    <h2>Physical Exercise</h2>
+    <p>Matched to energy level — the same walk isn't right for every dog.</p>
+  </div>
+  <div class="card-grid">
+    <div class="e-card">
+      <div class="eicon">🚶</div>
+      <h4>Low-energy dogs</h4>
+      <p>Older, smaller, or naturally laid-back breeds. Gentle, short outings are enough.</p>
+      <span class="edur">20–30 min/day</span>
+    </div>
+    <div class="e-card">
+      <div class="eicon">🏃</div>
+      <h4>Moderate-energy dogs</h4>
+      <p>Most adult dogs. A mix of walks and off-leash play covers this well.</p>
+      <span class="edur">45–75 min/day</span>
+    </div>
+    <div class="e-card">
+      <div class="eicon">⚡</div>
+      <h4>High-energy dogs</h4>
+      <p>Working and sporting breeds. Needs real exertion, not just a stroll.</p>
+      <span class="edur">90+ min/day</span>
+    </div>
+    <div class="e-card">
+      <div class="eicon">🎾</div>
+      <h4>Fetch & tug</h4>
+      <p>High-intensity bursts — great for burning energy fast in a small space.</p>
+      <span class="edur">10–20 min</span>
+    </div>
+    <div class="e-card">
+      <div class="eicon">🏊</div>
+      <h4>Swimming</h4>
+      <p>Low-impact, full-body — especially good for joint issues or hot weather.</p>
+      <span class="edur">15–30 min</span>
+    </div>
+    <div class="e-card">
+      <div class="eicon">🐕</div>
+      <h4>Off-leash play</h4>
+      <p>With another dog or in a secure space — burns energy differently than a walk.</p>
+      <span class="edur">20–40 min</span>
+    </div>
+  </div>
+</div>
+
+<div class="n-section" id="mental">
+  <div class="n-head mind">
+    <span class="tag">Mind</span>
+    <h2>Mental Enrichment</h2>
+    <p>Often skipped, but a tired mind settles a dog as much as a tired body.</p>
+  </div>
+  <div class="card-grid">
+    <div class="e-card mind">
+      <div class="eicon">🧩</div>
+      <h4>Puzzle feeders</h4>
+      <p>Turns mealtime into a problem to solve instead of a 30-second gulp.</p>
+      <span class="edur">10–15 min</span>
+    </div>
+    <div class="e-card mind">
+      <div class="eicon">👃</div>
+      <h4>Scent work</h4>
+      <p>Hide treats around a room and let them sniff it out — genuinely tiring mentally.</p>
+      <span class="edur">10–20 min</span>
+    </div>
+    <div class="e-card mind">
+      <div class="eicon">🎓</div>
+      <h4>Training / tricks</h4>
+      <p>Even 5 minutes of real focus-and-reward training builds mental stamina.</p>
+      <span class="edur">10–15 min</span>
+    </div>
+    <div class="e-card mind">
+      <div class="eicon">🌳</div>
+      <h4>New environments</h4>
+      <p>A new route or park gives far more mental input than a familiar walk.</p>
+      <span class="edur">Weekly</span>
+    </div>
+    <div class="e-card mind">
+      <div class="eicon">🦴</div>
+      <h4>Chew & lick enrichment</h4>
+      <p>Long-lasting chews or lick mats are naturally calming and mentally occupying.</p>
+      <span class="edur">15–30 min</span>
+    </div>
+    <div class="e-card mind">
+      <div class="eicon">🔍</div>
+      <h4>Find-it games</h4>
+      <p>Hide toys/treats around the house — low effort for you, high engagement for them.</p>
+      <span class="edur">5–10 min</span>
+    </div>
+  </div>
+</div>
+
+<div class="n-section" id="cautions">
+  <div class="n-head">
+    <span class="tag">Read First</span>
+    <h2>Life-Stage Cautions</h2>
+    <p>The same activity isn't safe at every age or for every breed.</p>
+  </div>
+  <div class="caution-grid">
+    <div class="caution-card">
+      <h4>Puppies & growth plates</h4>
+      <p>Avoid forced long runs, jumping, or repetitive high-impact activity until growth plates close (varies by breed size, often 12–18 months). Short, frequent play is safer than one long session.</p>
+    </div>
+    <div class="caution-card">
+      <h4>Seniors & joints</h4>
+      <p>Keep it low-impact — shorter, more frequent walks beat one long one. Watch for stiffness after activity and adjust down if it appears.</p>
+    </div>
+    <div class="caution-card">
+      <h4>Flat-faced (brachycephalic) breeds</h4>
+      <p>Bulldogs, Pugs, and similar breeds overheat fast and struggle to cool down. Keep exercise short, avoid heat and humidity entirely.</p>
+    </div>
+    <div class="caution-card">
+      <h4>After meals</h4>
+      <p>Avoid vigorous exercise right after a big meal, especially in deep-chested breeds — linked to bloat risk. Rest 1+ hour before intense activity.</p>
+    </div>
+  </div>
+</div>
+
+<footer>General guidance only — a dog with an existing injury, condition, or breed-specific risk should have their exercise plan checked with a vet first.</footer>
+
+<script>
+const ENERGY_MIN = { low:{phys:25, mind:15}, moderate:{phys:60, mind:20}, high:{phys:100, mind:25} };
+const STAGE_MULT = { puppy:0.6, adult:1, senior:0.65 };
+
+let energy = 'moderate';
+let stage = 'adult';
+
+function wireGroup(groupId, dataAttr, setter){
+  document.querySelectorAll('#'+groupId+' .opt').forEach(function(el){
+    el.addEventListener('click', function(){
+      document.querySelectorAll('#'+groupId+' .opt').forEach(function(o){ o.classList.remove('selected'); });
+      el.classList.add('selected');
+      setter(el.dataset[dataAttr]);
+    });
+  });
+}
+wireGroup('energyGroup','e', function(v){ energy = v; });
+wireGroup('stageGroup','s', function(v){ stage = v; });
+
+function buildSchedule(physMin, mindMin, stageKey){
+  const blocks = [];
+  if(stageKey === 'puppy'){
+    blocks.push(['7:30 AM','Morning potty + short play','mind', Math.round(mindMin*0.2)+' min — quick sniff-and-explore before breakfast']);
+    blocks.push(['9:00 AM','Short walk','phys', Math.round(physMin*0.3)+' min — puppies do best with several short outings, not one long one']);
+    blocks.push(['12:30 PM','Puzzle feeder lunch','mind', Math.round(mindMin*0.4)+' min — turns a meal into mental work']);
+    blocks.push(['4:00 PM','Play session','phys', Math.round(physMin*0.4)+' min — gentle fetch or tug, avoid hard jumping']);
+    blocks.push(['6:30 PM','Evening potty + wind-down chew','phys', Math.round(physMin*0.3)+' min — calm chew toy to settle before bed']);
+  } else {
+    blocks.push(['7:00 AM','Morning walk','phys', Math.round(physMin*0.45)+' min — start the day with the longer walk']);
+    blocks.push(['12:00 PM','Midday mental game','mind', Math.round(mindMin*0.5)+' min — puzzle feeder or scent game']);
+    blocks.push(['5:30 PM','Second walk or play','phys', Math.round(physMin*0.55)+' min — walk, fetch, or off-leash time']);
+    blocks.push(['8:00 PM','Wind-down enrichment','mind', Math.round(mindMin*0.5)+' min — chew, lick mat, or short training session']);
+  }
+  return blocks;
+}
+
+document.getElementById('buildBtn').addEventListener('click', function(){
+  const base = ENERGY_MIN[energy];
+  const mult = STAGE_MULT[stage];
+  const physMin = Math.round(base.phys * mult);
+  const mindMin = Math.round(base.mind * mult);
+
+  document.getElementById('physMin').textContent = physMin;
+  document.getElementById('mindMin').textContent = mindMin;
+
+  const blocks = buildSchedule(physMin, mindMin, stage);
+  const root = document.getElementById('timelineRoot');
+  root.innerHTML = blocks.map(function(b){
+    const isMind = b[2] === 'mind';
+    return '<div class="tl-item'+(isMind?' mind':'')+'">' +
+      '<span class="tl-time">'+b[0]+'</span>' +
+      '<h4>'+b[1]+'</h4>' +
+      '<p>'+b[3]+'</p>' +
+    '</div>';
+  }).join('');
+
+  document.getElementById('routineResult').classList.add('show');
+});
+</script>
+</body>
+</html>

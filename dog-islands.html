@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>Companion — Dog Nutrition</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  html{ color-scheme:light; }
+  :root{
+    --sky1:#BFE0F5; --sky2:#EAF4FB; --sky3:#DCEEF7;
+    --ink:#12283B; --ink-dim:#4C6478;
+    --card:rgba(255,255,255,0.82);
+    --ring:rgba(18,40,59,0.18);
+    --protein:#E76B4E; --vitamin:#4F8FE0; --mineral:#3FB8D8;
+    --carb:#E0A93F; --fiber:#5FAE5C; --fat:#E0C23F;
+  }
+  *{margin:0; padding:0; box-sizing:border-box;}
+  body{
+    font-family:'Inter',sans-serif;
+    color:var(--ink);
+    background:linear-gradient(180deg, var(--sky1) 0%, var(--sky3) 45%, var(--sky2) 100%);
+    min-height:100vh;
+    overflow-x:hidden;
+    position:relative;
+  }
+  .bg-layer{
+    position:fixed; top:-4%; left:-4%; width:108%; height:108%;
+    object-fit:cover;
+    z-index:-1;
+    will-change:transform;
+  }
+  .display{font-family:'Space Grotesk',sans-serif;}
+
+  /* clouds */
+  .cloud-layer{position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;}
+  .cloud{
+    position:absolute; background:#fff; border-radius:50%;
+    filter:blur(2px); opacity:0.55;
+  }
+
+  nav{
+    position:fixed; top:0; left:0; right:0; z-index:20;
+    display:flex; justify-content:space-between; align-items:center;
+    padding:20px 5vw;
+    background:rgba(255,255,255,0.4);
+    backdrop-filter:blur(10px);
+  }
+  .brand{
+    display:flex; align-items:center; gap:10px; font-family:'Space Grotesk',sans-serif; font-weight:700;
+    font-size:1.15rem; color:var(--ink);
+  }
+  .brand .badge{
+    width:36px; height:36px; border-radius:11px; background:#fff;
+    display:flex; align-items:center; justify-content:center; font-size:1.2rem;
+    box-shadow:0 4px 14px rgba(20,50,60,0.1);
+  }
+  nav ul{list-style:none; display:flex; gap:38px;}
+  nav ul li{ position:relative; }
+  nav ul a{
+    text-decoration:none; color:var(--ink); font-size:0.94rem; font-weight:600;
+  }
+  nav ul li.active a{ color:var(--ink); }
+  nav ul li.active::after{
+    content:''; position:absolute; left:50%; bottom:-10px; transform:translateX(-50%);
+    width:5px; height:5px; border-radius:50%; background:var(--protein);
+  }
+  .back-btn{
+    background:transparent; color:var(--ink); border:1.5px solid rgba(18,40,59,0.25); border-radius:100px;
+    padding:11px 24px; font-size:0.88rem; font-weight:600; cursor:pointer;
+    display:flex; align-items:center; gap:8px; font-family:'Inter',sans-serif;
+    transition:background .2s;
+  }
+  .back-btn:hover{ background:rgba(255,255,255,0.5); }
+
+  .stage{
+    position:relative; z-index:2;
+    max-width:1600px; margin:0 auto;
+    padding:150px 5vw 100px;
+    min-height:100vh;
+  }
+
+  .copy{
+    position:absolute; left:0.5vw; top:50%; transform:translateY(-50%);
+    width:460px;
+    padding:30px 0;
+  }
+  .copy::before{
+    content:'';
+    position:absolute; left:-8vw; top:-60px; right:-60px; bottom:-60px;
+    background:radial-gradient(ellipse 70% 100% at 20% 50%, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0.3) 45%, rgba(255,255,255,0) 75%);
+    z-index:-1;
+  }
+  .eyebrow{
+    display:inline-block; background:rgba(255,255,255,0.85); color:var(--protein);
+    padding:8px 18px; border-radius:100px; font-size:0.8rem; font-weight:700;
+    margin-bottom:22px; box-shadow:0 4px 14px rgba(20,50,60,0.08);
+  }
+  h1{
+    font-family:'Space Grotesk',sans-serif; font-weight:700;
+    font-size:clamp(2.8rem, 4.6vw, 4rem); line-height:1.04; margin-bottom:22px;
+    color:var(--ink);
+    text-shadow:0 2px 24px rgba(255,255,255,0.6);
+  }
+  h1 .accent{color:var(--protein);}
+  .copy p{
+    color:var(--ink); opacity:0.75; font-size:1.05rem; line-height:1.65; max-width:38ch; margin-bottom:30px;
+    font-weight:500;
+  }
+  .cta-row{display:flex; align-items:center; gap:22px; margin-bottom:44px;}
+  .cta{
+    background:var(--ink); color:#fff; border:none; border-radius:100px;
+    padding:14px 24px; font-size:0.92rem; font-weight:600; cursor:pointer;
+    display:inline-flex; align-items:center; gap:10px; font-family:'Inter',sans-serif;
+  }
+  .cta:hover{background:#0A1C2B;}
+  .watch{
+    display:flex; align-items:center; gap:10px; font-size:0.92rem; font-weight:600; color:var(--ink); cursor:pointer;
+  }
+  .watch .play{
+    width:32px; height:32px; border-radius:50%; border:1.5px solid var(--ink);
+    display:flex; align-items:center; justify-content:center; font-size:0.7rem;
+  }
+  .stat-row{display:flex; gap:36px;}
+  .stat-row div{display:flex; flex-direction:column;}
+  .stat-row b{font-family:'Space Grotesk',sans-serif; font-size:1.6rem; color:var(--ink); font-weight:700;}
+  .stat-row span{font-size:0.78rem; color:var(--ink); opacity:0.65; font-weight:500;}
+
+  /* ORBIT AREA */
+  .orbit-wrap{
+    position:absolute; right:3vw; top:50%; transform:translateY(-50%);
+    width:860px; height:760px;
+  }
+  .ring{
+    position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    border:1px dashed var(--ring); border-radius:50%;
+  }
+  .ring.r1{width:600px; height:600px;}
+
+  .island{
+    position:absolute;
+    cursor:pointer;
+    width:190px;
+  }
+  .island .platform{
+    position:relative;
+    width:190px; height:112px;
+    display:flex; align-items:center; justify-content:center;
+    filter:drop-shadow(0 22px 24px rgba(20,50,60,0.25));
+  }
+  .island .rock{
+    position:absolute; left:50%; top:34px; transform:translateX(-50%);
+    width:190px; height:70px;
+    background:linear-gradient(180deg,#8B7156,#6B5640);
+    clip-path:polygon(8% 0%, 92% 0%, 100% 55%, 78% 100%, 22% 100%, 0% 55%);
+    border-radius:6px;
+  }
+  .island .grass{
+    position:absolute; left:50%; top:22px; transform:translateX(-50%);
+    width:178px; height:38px; border-radius:50%;
+    background:radial-gradient(ellipse at 50% 30%, #8FCB6E, #5FA84A 70%);
+  }
+  .island .icon-wrap{
+    position:absolute; left:50%; top:-4px; transform:translateX(-50%);
+    width:64px; height:64px; border-radius:16px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.7rem;
+    box-shadow:0 10px 20px rgba(0,0,0,0.15);
+    z-index:2;
+  }
+  .island .base-island-img{
+    position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    width:190px; height:auto;
+    filter:drop-shadow(0 18px 18px rgba(20,50,60,0.28));
+  }
+  .island .photo-island{
+    width:190px; height:112px;
+    object-fit:contain;
+    filter:drop-shadow(0 18px 18px rgba(20,50,60,0.28));
+  }
+  .island.has-photo .platform{ width:190px; height:112px; }
+  .island.carb .photo-island{ height:172px; }
+  .island.carb .platform{ height:172px; }
+  .island.fat .photo-island{ height:172px; }
+  .island.fat .platform{ height:172px; }
+  .island.vitamin .photo-island{ height:172px; }
+  .island.vitamin .platform{ height:172px; }
+  .island.protein .photo-island{ height:150px; }
+  .island.protein .platform{ height:150px; }
+  .island.mineral .photo-island{ height:172px; }
+  .island.mineral .platform{ height:172px; }
+  .island.fiber .photo-island{ height:172px; }
+  .island.fiber .platform{ height:172px; }
+  .callout{
+    position:absolute;
+    background:rgba(255,255,255,0.96);
+    border-radius:20px;
+    padding:10px 20px 10px 10px;
+    display:flex; align-items:center; gap:12px;
+    box-shadow:0 10px 26px rgba(20,50,60,0.14);
+    width:auto;
+    white-space:nowrap;
+  }
+  .callout::after{
+    content:'';
+    position:absolute; bottom:-9px; left:32px;
+    width:18px; height:18px;
+    background:rgba(255,255,255,0.96);
+    clip-path:polygon(0 0, 100% 0, 0 100%);
+    border-radius:0 0 0 4px;
+    transform:rotate(0deg);
+  }
+  .callout .cicon{
+    width:40px; height:40px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; font-size:1.15rem; flex:none;
+  }
+  .callout .ctext{max-width:170px;}
+  .callout .ctext .t{font-weight:700; font-size:0.95rem; font-family:'Space Grotesk',sans-serif; color:#12283B;}
+  .callout .ctext .d{font-size:0.78rem; color:#5A6E80; line-height:1.3; white-space:normal;}
+
+  /* central dog island */
+  .center-island{
+    position:absolute; left:50%; top:50%;
+    z-index:5;
+    display:flex; flex-direction:column; align-items:center;
+  }
+  .center-platform{
+    position:relative; width:420px; height:290px;
+  }
+  .center-base-img{
+    position:absolute; left:50%; top:40px; transform:translateX(-50%);
+    width:420px; height:auto;
+    filter:drop-shadow(0 28px 26px rgba(20,50,60,0.3));
+  }
+  .center-pet{
+    position:absolute; left:50%; bottom:118px; transform:translateX(-50%);
+    height:300px; width:auto; z-index:3;
+    filter:drop-shadow(0 20px 18px rgba(20,50,60,0.3));
+  }
+  .center-label{
+    margin-top:6px; text-align:center;
+  }
+  .center-label .n{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.1rem;}
+  .center-label .b{font-size:0.78rem; color:var(--ink-dim);}
+
+  /* island color themes */
+  .island.protein .icon-wrap{background:#FFD9CC; color:var(--protein);}
+  .island.protein .callout .cicon{background:#FFD9CC; color:var(--protein);}
+  .island.vitamin .icon-wrap{background:#D7E7FB; color:var(--vitamin);}
+  .island.vitamin .callout .cicon{background:#D7E7FB; color:var(--vitamin);}
+  .island.mineral .icon-wrap{background:#CFF1F7; color:var(--mineral);}
+  .island.mineral .callout .cicon{background:#CFF1F7; color:var(--mineral);}
+  .island.carb .icon-wrap{background:#FBEBCB; color:var(--carb);}
+  .island.carb .callout .cicon{background:#FBEBCB; color:var(--carb);}
+  .island.fiber .icon-wrap{background:#DCF2D8; color:var(--fiber);}
+  .island.fiber .callout .cicon{background:#DCF2D8; color:var(--fiber);}
+  .island.fat .icon-wrap{background:#FBF2C7; color:#B99A1F;}
+  .island.fat .callout .cicon{background:#FBF2C7; color:#B99A1F;}
+
+  /* positions: measured directly from reference image pixel grid, relative to dog-island center */
+  .center-island{ transform:translate(-50%,-50%); }
+  .island.protein{ left:calc(50% - 225px); top:calc(50% - 210px); transform:translate(-50%,-50%); }
+  .island.vitamin{ left:calc(50% + 180px); top:calc(50% - 250px); transform:translate(-50%,-50%); }
+  .island.mineral{ left:calc(50% + 330px); top:calc(50% - 110px); transform:translate(-50%,-50%); }
+  .island.carb{    left:calc(50% + 265px); top:calc(50% + 120px); transform:translate(-50%,-50%); }
+  .island.fiber{   left:calc(50% - 125px); top:calc(50% + 200px); transform:translate(-50%,-50%); }
+  .island.fat{     left:calc(50% - 315px); top:calc(50% + 30px);  transform:translate(-50%,-50%); }
+
+  /* callouts: directional offsets measured from reference (protein/vitamin point up, others point to their outer/inner side) */
+  .island.protein .callout{ top:-40px; right:calc(100% + 42px); }
+  .island.vitamin .callout{ top:-95px; left:150px; }
+  .island.mineral .callout{ top:24px;  left:calc(100% + 10px); }
+  .island.carb .callout{    top:145px; left:calc(100% + 80px); }
+  .island.fiber .callout{   top:55px; right:calc(100% + 38px); }
+  .island.fat .callout{     top:28px; right:calc(100% + 46px); }
+
+
+  .float{ animation:floaty 5s ease-in-out infinite; }
+  @keyframes floaty{
+    0%,100%{ transform:translateY(0px); }
+    50%{ transform:translateY(-14px); }
+  }
+
+  .orbit-wrap{ perspective:1400px; }
+  .island, .center-island{
+    will-change:transform, scale, opacity;
+    opacity:0;
+    scale:0.4;
+    transition:opacity 0.7s cubic-bezier(.2,.8,.3,1), scale 0.7s cubic-bezier(.2,.8,.3,1);
+  }
+  .center-island{ scale:0.5; }
+  .island.in-view, .center-island.in-view{
+    opacity:1;
+    scale:1;
+  }
+  .island:hover{
+    scale:1.1;
+    z-index:10;
+  }
+  .island.zooming{
+    animation:none !important;
+    transition:scale .6s cubic-bezier(.3,.7,.3,1), opacity .6s;
+    scale:3;
+    opacity:0;
+    z-index:20;
+  }
+  .orbit-wrap.zoom-out .island:not(.zooming),
+  .orbit-wrap.zoom-out .center-island{
+    transition:opacity .4s, scale .4s;
+    opacity:0;
+    scale:0.8;
+  }
+
+  @media (max-width: 1150px){
+    .stage{padding-top:120px; min-height:auto;}
+    .copy{position:relative; left:0; top:0; transform:none; width:100%; text-align:center; margin:0 auto 40px;}
+    .copy p{margin-left:auto; margin-right:auto;}
+    .cta-row, .stat-row{justify-content:center;}
+    .orbit-wrap{position:relative; right:0; top:0; transform:none; width:100%; height:640px; margin:0 auto; }
+    nav ul{display:none;}
+  }
+  /* NUTRIENT DETAIL PANEL */
+  .detail-overlay{
+    position:fixed; inset:0; z-index:100;
+    background:rgba(10,25,35,0.55);
+    backdrop-filter:blur(8px);
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; pointer-events:none;
+    transition:opacity .35s ease;
+    padding:5vh 5vw;
+  }
+  .detail-overlay.open{ opacity:1; pointer-events:all; }
+  .detail-card{
+    position:relative;
+    background:#040F12;
+    border-radius:28px;
+    max-width:760px; width:100%; max-height:88vh;
+    overflow:hidden;
+    transform:scale(0.92) translateY(20px);
+    transition:transform .35s cubic-bezier(.2,.8,.3,1);
+    box-shadow:0 40px 80px rgba(10,25,35,0.35);
+  }
+  .detail-bg-video{
+    position:absolute; inset:0; width:100%; height:100%;
+    object-fit:cover; z-index:0;
+  }
+  .detail-scrim{
+    position:absolute; inset:0; z-index:1;
+    background:linear-gradient(180deg, rgba(4,15,18,0.82), rgba(4,15,18,0.9));
+  }
+  .detail-scroll{
+    position:relative; z-index:2;
+    max-height:88vh; overflow-y:auto;
+    padding:44px 48px 48px;
+  }
+  .detail-overlay.open .detail-card{ transform:scale(1) translateY(0); }
+  .detail-close{
+    position:absolute; top:28px; right:32px;
+    width:38px; height:38px; border-radius:50%;
+    background:rgba(255,255,255,0.12); border:none; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.1rem; color:#EFF6F6;
+  }
+  .detail-close:hover{ background:rgba(255,255,255,0.2); }
+  .detail-head{ display:flex; align-items:center; gap:16px; margin-bottom:8px; }
+  .detail-icon{
+    width:56px; height:56px; border-radius:16px;
+    display:flex; align-items:center; justify-content:center; font-size:1.7rem; flex:none;
+  }
+  .detail-head h2{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.9rem; color:#F2FAFA; }
+  .detail-tag{ font-size:0.85rem; color:#A9C6C6; margin-bottom:28px; }
+  .detail-section{ margin-bottom:26px; }
+  .detail-section h3{
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.05rem; color:#F2FAFA;
+    margin-bottom:12px; display:flex; align-items:center; gap:8px;
+  }
+  .detail-section h3::before{ content:''; width:8px; height:8px; border-radius:2px; background:#5FE0C0; display:inline-block; }
+  .detail-section.avoid h3::before{ background:#E88A6E; }
+  .food-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .food-item{
+    background:#050F12; border:1px solid rgba(255,255,255,0.08);
+    border-radius:14px; padding:12px 16px;
+    font-size:0.92rem; color:#DCEBEA;
+  }
+  .food-item b{ display:block; font-family:'Space Grotesk',sans-serif; font-size:0.95rem; margin-bottom:2px; color:#F2FAFA; }
+  .food-item span{ font-size:0.8rem; color:#9FC0BE; line-height:1.4; }
+  .detail-section.avoid .food-item{ background:#170A06; border-color:rgba(232,138,110,0.25); }
+  .detail-note{
+    background:#04120F; border:1px solid rgba(95,224,192,0.2);
+    border-radius:14px; padding:14px 18px;
+    font-size:0.85rem; color:#CFEAE6; line-height:1.5; margin-top:6px;
+  }
+  @media (max-width:640px){
+    .food-grid{ grid-template-columns:1fr; }
+    .detail-scroll{ padding:32px 24px 36px; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .float{animation:none;}
+  }
+</style>
+
+</head>
+<body>
+
+<video class="bg-layer" id="bgLayer" autoplay muted loop playsinline poster="./assets/sky-bg.png">
+  <source src="./assets/bg-video.mp4" type="video/mp4">
+</video>
+
+
+<div class="cloud-layer" id="clouds"></div>
+
+<nav>
+  <div class="brand"><span class="badge">🐾</span>Companion</div>
+  <ul>
+    <li class="active"><a href="#">Home</a></li>
+    <li><a href="./nutrition.html">Nutrition</a></li>
+    <li><a href="./feeding-calculator.html">Calculator</a></li>
+    <li><a href="./meals.html">Meals</a></li>
+    <li><a href="./exercise.html">Exercise</a></li>
+    <li><a href="#">About Us</a></li>
+  </ul>
+  <button class="back-btn" onclick="window.history.back()">← Back</button>
+</nav>
+
+<div class="stage">
+  <div class="copy">
+    <span class="eyebrow">Unlock Their Best Life</span>
+    <h1>Complete<br>Nutrition,<br><span class="accent">Naturally.</span></h1>
+    <p>Six essential nutrient groups, mapped around your dog. Click any island to go deeper into what it does and where it comes from.</p>
+    <div class="cta-row">
+      <button class="cta">Explore Nutrition →</button>
+      <div class="watch"><span class="play">▶</span> Watch Video</div>
+    </div>
+    <div class="stat-row">
+      <div><b>6</b><span>Essential Nutrients</span></div>
+      <div><b>100%</b><span>Complete &amp; Balanced</span></div>
+      <div><b>∞</b><span>Tailored for Life</span></div>
+    </div>
+  </div>
+
+  <div class="orbit-wrap" id="orbitWrap">
+    <div class="ring r1" data-depth="10"></div>
+
+    <div class="center-island float" data-depth="55" id="centerIsland">
+      <div class="center-platform">
+        <img class="center-base-img" src="./assets/center-base.png" alt="Island base">
+        <img class="center-pet" src="./assets/husky.png" alt="Dog">
+      </div>
+      <div class="center-label">
+        <div class="n">Your Dog</div>
+        <div class="b">Standard nutrient profile</div>
+      </div>
+    </div>
+
+    <div class="island protein has-photo float" data-enter=".2" data-key="protein" data-depth="30">
+      <div class="platform">
+        <img class="photo-island" src="./assets/protein-island.png" alt="Protein island">
+      </div>
+      <div class="callout">
+        <div class="cicon"><img src="./assets/steak-icon.png" alt="Protein" style="width:20px; height:auto;"></div>
+        <div class="ctext"><div class="t">Protein</div><div class="d">Builds strong muscles</div></div>
+      </div>
+    </div>
+
+    <div class="island vitamin has-photo float" data-enter=".6" data-key="vitamin" data-depth="24">
+      <div class="platform"><img class="photo-island" src="./assets/vitamin-island.png" alt="Vitamin island"></div>
+      <div class="callout">
+        <div class="cicon"><img src="./assets/broccoli-icon.png" alt="Vitamin" style="width:20px; height:auto;"></div>
+        <div class="ctext"><div class="t">Vitamin</div><div class="d">Supports immune health</div></div>
+      </div>
+    </div>
+
+    <div class="island mineral has-photo float" data-enter="1" data-key="mineral" data-depth="35">
+      <div class="platform"><img class="photo-island" src="./assets/mineral-island.png" alt="Mineral island"></div>
+      <div class="callout">
+        <div class="cicon"><img src="./assets/diamond-icon.png" alt="Mineral" style="width:20px; height:auto;"></div>
+        <div class="ctext"><div class="t">Mineral</div><div class="d">Strengthens bones &amp; teeth</div></div>
+      </div>
+    </div>
+
+    <div class="island carb has-photo float" data-enter="1.4" data-key="carb" data-depth="20">
+      <div class="platform"><img class="photo-island" src="./assets/carb-island.png" alt="Carbohydrate island"></div>
+      <div class="callout">
+        <div class="cicon"><img src="./assets/grain-icon.png" alt="Carbohydrate" style="width:20px; height:auto;"></div>
+        <div class="ctext"><div class="t">Carbohydrate</div><div class="d">Provides lasting energy</div></div>
+      </div>
+    </div>
+
+    <div class="island fiber has-photo float" data-enter="1.8" data-key="fiber" data-depth="28">
+      <div class="platform"><img class="photo-island" src="./assets/fiber-island.png" alt="Fiber island"></div>
+      <div class="callout">
+        <div class="cicon">🌿</div>
+        <div class="ctext"><div class="t">Fiber</div><div class="d">Promotes healthy digestion</div></div>
+      </div>
+    </div>
+
+    <div class="island fat has-photo float" data-enter="2.2" data-key="fat" data-depth="32">
+      <div class="platform"><img class="photo-island" src="./assets/fat-island.png" alt="Healthy Fat island"></div>
+      <div class="callout">
+        <div class="cicon"><img src="./assets/avocado-icon.png" alt="Healthy Fat" style="width:20px; height:auto;"></div>
+        <div class="ctext"><div class="t">Healthy Fat</div><div class="d">Skin, coat &amp; brain health</div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="detail-overlay" id="detailOverlay">
+  <div class="detail-card" id="detailCard">
+    <video class="detail-bg-video" autoplay muted loop playsinline>
+      <source src="./assets/detail-video.mp4" type="video/mp4">
+    </video>
+    <div class="detail-scrim"></div>
+    <div class="detail-scroll" id="detailScroll"></div>
+  </div>
+</div>
+
+<script>
+/* background parallax — moves subtly opposite the cursor across the whole page */
+const bgLayer = document.getElementById('bgLayer');
+let bgTargetX = 0, bgTargetY = 0, bgCurX = 0, bgCurY = 0;
+window.addEventListener('mousemove', e=>{
+  bgTargetX = (e.clientX / window.innerWidth - 0.5);
+  bgTargetY = (e.clientY / window.innerHeight - 0.5);
+});
+function bgParallaxLoop(){
+  bgCurX += (bgTargetX - bgCurX) * 0.04;
+  bgCurY += (bgTargetY - bgCurY) * 0.04;
+  const maxShift = 22; // px
+  bgLayer.style.transform = `translate(${-bgCurX*maxShift}px, ${-bgCurY*maxShift}px)`;
+  requestAnimationFrame(bgParallaxLoop);
+}
+requestAnimationFrame(bgParallaxLoop);
+
+/* trigger staggered entrance */
+const centerIslandEl = document.getElementById('centerIsland');
+setTimeout(()=> centerIslandEl.classList.add('in-view'), 100);
+document.querySelectorAll('.island').forEach(el=>{
+  const delay = parseFloat(el.dataset.enter || '0') * 1000;
+  setTimeout(()=> el.classList.add('in-view'), delay);
+});
+
+/* soft drifting clouds */
+/* fake CSS clouds removed — using real sky-bg.png photo instead */
+const cloudLayer = document.getElementById('clouds');
+if(cloudLayer) cloudLayer.remove();
+
+/* cursor-driven parallax across depth layers */
+const orbitWrap = document.getElementById('orbitWrap');
+const depthEls = orbitWrap.querySelectorAll('[data-depth]');
+let targetX = 0, targetY = 0, curX = 0, curY = 0;
+
+orbitWrap.addEventListener('mousemove', e=>{
+  const r = orbitWrap.getBoundingClientRect();
+  targetX = ((e.clientX - r.left)/r.width - 0.5);
+  targetY = ((e.clientY - r.top)/r.height - 0.5);
+});
+orbitWrap.addEventListener('mouseleave', ()=>{ targetX = 0; targetY = 0; });
+
+function parallaxLoop(){
+  curX += (targetX - curX) * 0.06;
+  curY += (targetY - curY) * 0.06;
+  depthEls.forEach(el=>{
+    const depth = parseFloat(el.dataset.depth);
+    const px = -curX * depth;
+    const py = -curY * depth * 0.6;
+    el.style.translate = `${px}px ${py}px`;
+  });
+  requestAnimationFrame(parallaxLoop);
+}
+requestAnimationFrame(parallaxLoop);
+
+/* nutrient detail content */
+const NUTRIENT_DETAILS = {
+  protein: {
+    icon:'<img src="./assets/steak-icon.png" alt="Protein" style="width:28px;height:auto;">', iconBg:'#FFD9CC', color:'#E76B4E',
+    title:'Protein', tag:'Builds and repairs muscle, skin, and coat',
+    sections:[
+      { heading:'Muscle meats', items:[
+        ['Chicken','Skinless, cooked plain — no seasoning or bones'],
+        ['Turkey','Lean and easy to digest, cooked plain'],
+        ['Beef','Lean cuts, cooked, fat trimmed off'],
+        ['Duck','Cooked, skin removed — richer, good for variety'],
+        ['Rabbit','Lean and novel — good option for sensitive stomachs'],
+        ['Venison','Lean, cooked — common in limited-ingredient diets'],
+      ]},
+      { heading:'Organ meats (feed in moderation)', items:[
+        ['Liver (chicken/beef)','Rich in vitamin A — small amounts, ~5-10% of diet max'],
+        ['Kidney','Nutrient-dense, cooked, small portions only'],
+        ['Heart','Technically a muscle — lean, great occasional protein'],
+        ['Tripe (green)','Naturally balanced calcium/phosphorus, cooked or reputable raw'],
+      ]},
+      { heading:'Bones & chews (raw only — never cooked)', items:[
+        ['Raw chicken feet','Natural source of glucosamine/collagen for joints'],
+        ['Raw chicken necks/wings','Soft, edible raw bone — supervise always'],
+        ['Raw beef marrow bones','Give whole/raw, size-appropriate — supervise, remove if it cracks teeth-sized'],
+        ['Raw turkey necks','Larger alternative for bigger dogs, raw only'],
+      ]},
+      { heading:'Seafood', items:[
+        ['Salmon','Cooked only, deboned — never raw or smoked'],
+        ['Whitefish (cod, etc.)','Cooked, deboned, plain'],
+        ['Sardines','Small bones are soft/safe, packed in water not oil'],
+        ['Shrimp','Cooked, shell and tail removed'],
+      ]},
+      { heading:'Eggs', items:[
+        ['Whole eggs','Fully cooked — scrambled or boiled, no salt or butter'],
+      ]},
+    ],
+    avoid:[
+      ['Processed deli meat','High salt and preservatives'],
+      ['Raw muscle meat/fish','Risk of bacteria and parasites — bones are the raw exception, not muscle meat'],
+      ['Cooked bones of any kind','Cooking makes bones brittle — they splinter and cause choking or gut injury'],
+      ['Fatty trims / skin','Can trigger pancreatitis'],
+      ['Excess liver/organ meat','Too much vitamin A over time can cause toxicity'],
+    ],
+    note:"General guide only — portion size depends on your dog's weight, age, and activity level. Always supervise bone-chewing and size the bone to the dog. Check with a vet for exact amounts."
+  },
+  vitamin: {
+    icon:'<img src="./assets/broccoli-icon.png" alt="Vitamin" style="width:28px;height:auto;">', iconBg:'#D7E7FB', color:'#4F8FE0',
+    title:'Vitamin', tag:'Supports immune health, vision, skin, and coat',
+    sections:[
+      { heading:'Vegetables', items:[
+        ['Carrots','Raw or cooked — great source of vitamin A (beta-carotene)'],
+        ['Broccoli','Small amounts, cooked or raw — vitamin C and K'],
+        ['Sweet potato','Cooked, no skin — vitamin A and fiber'],
+        ['Spinach','Small amounts, cooked — vitamin A, C, K (oxalates in excess)'],
+        ['Bell peppers','Raw or cooked, seeds removed — high in vitamin C'],
+        ['Pumpkin','Cooked, plain puree — vitamin A and digestion support'],
+        ['Cucumber','Raw, sliced — low-calorie, hydrating snack'],
+        ['Celery','Small pieces — low-calorie, helps with fresh breath'],
+        ['Zucchini','Raw or cooked, plain — low-calorie'],
+        ['Green peas','Fresh or frozen, plain — not canned with added salt'],
+        ['Green beans','Plain, cooked or raw — low-calorie fiber'],
+        ['Cauliflower','Small amounts, plain — can cause gas in excess'],
+        ['Asparagus','Cooked, plain — tough and hard to chew raw'],
+        ['Brussels sprouts','Small amounts, cooked — can cause gas'],
+        ['Cabbage','Small amounts, cooked — gas and thyroid effects in excess'],
+      ]},
+      { heading:'Fruits', items:[
+        ['Blueberries','Fresh or frozen — vitamin C and antioxidants'],
+        ['Apples','Sliced, seeds and core removed — vitamin A and C'],
+        ['Watermelon','Seedless, rind removed — vitamin A, C, hydration'],
+        ['Oranges','Small amounts, peeled, seedless — vitamin C'],
+        ['Strawberries','Fresh, sliced — vitamin C and fiber'],
+        ['Banana','Small amounts — potassium, high in natural sugar'],
+        ['Pineapple','Fresh, core and rind removed, small amounts'],
+        ['Mango','Ripe, peeled and pitted — moderation, high in sugar'],
+        ['Pear','Sliced, seeds and core removed'],
+        ['Cantaloupe','Seedless, small amounts — high in sugar'],
+        ['Peaches','Fresh only, pitted — never canned or in syrup'],
+        ['Raspberries','Small amounts, occasional — contain trace natural xylitol'],
+        ['Cranberries','Plain, small amounts — unsweetened only'],
+      ]},
+      { heading:'Other sources', items:[
+        ['Eggs','Cooked — vitamin A, D, B12, and riboflavin'],
+        ['Fish (salmon, sardines)','Cooked — vitamin D and E'],
+        ['Plain yogurt','Small amounts, no xylitol — B vitamins and probiotics'],
+      ]},
+    ],
+    avoid:[
+      ['Grapes & raisins','Toxic — can cause acute kidney failure'],
+      ['Onions, garlic, chives','Damage red blood cells, even cooked or powdered'],
+      ['Avocado','Contains persin — skin and pit are the biggest risk'],
+      ['Unripe tomatoes / plant','Solanine in stems, leaves, and green fruit is toxic'],
+      ['Citrus peel & seeds','Essential oils and compounds can upset the stomach'],
+      ['Raw / green potato','Solanine in raw or green-skinned potato is toxic'],
+      ['Wild mushrooms','Many varieties are toxic — stick to plain cooked store-bought only'],
+    ],
+    note:"Whole foods are the best source — most dogs on a complete, balanced diet don't need separate vitamin supplements unless a vet recommends one."
+  },
+  mineral: {
+    icon:'<img src="./assets/diamond-icon.png" alt="Mineral" style="width:26px;height:auto;">', iconBg:'#CFF1F7', color:'#3FB8D8',
+    title:'Mineral', tag:'Strengthens bones and teeth, supports nerve and muscle function',
+    sections:[
+      { heading:'Great sources', items:[
+        ['Sardines (with bone)','Cooked or canned in water — calcium, phosphorus, omega-3'],
+        ['Plain yogurt / cottage cheese','Small amounts — calcium and probiotics'],
+        ['Raw meaty bones','Chicken necks/feet — natural calcium and phosphorus, raw only'],
+        ['Pumpkin seeds','Ground, small amount — zinc and magnesium'],
+        ['Eggshell (finely ground)','A pinch adds concentrated calcium — easy to overdo'],
+        ['Seaweed / kelp','Tiny amount only — source of iodine'],
+      ]},
+    ],
+    avoid:[
+      ['Calcium supplements without guidance','Excess can cause skeletal problems, especially in large-breed puppies'],
+      ['Too much organ meat','Can throw off copper/iron balance over time'],
+      ['Human mineral supplements','Dosed for humans, not sized for a dog'],
+    ],
+    note:"Minerals work in ratios — too much of one (like calcium) can block absorption of another (like zinc). Best sourced from whole foods within a complete diet; only supplement under a vet's guidance."
+  },
+  carb: {
+    icon:'<img src="./assets/grain-icon.png" alt="Carbohydrate" style="width:28px;height:auto;">', iconBg:'#FBEBCB', color:'#E0A93F',
+    title:'Carbohydrate', tag:'Provides efficient, lasting energy',
+    sections:[
+      { heading:'Great sources', items:[
+        ['White rice','Cooked plain — easy to digest, gentle on sensitive stomachs'],
+        ['Brown rice','Cooked — more fiber than white rice'],
+        ['Oats','Cooked plain — slow-release energy plus fiber'],
+        ['Sweet potato','Cooked, no skin — complex carb plus vitamin A'],
+        ['Quinoa','Cooked, rinsed well — carb with a protein boost'],
+        ['Barley','Cooked plain — fiber and B vitamins'],
+      ]},
+    ],
+    avoid:[
+      ['Bread & pasta','Refined, low nutritional value — some recipes hide garlic or onion'],
+      ['Corn on the cob','Not digestible and a serious choking/blockage hazard'],
+      ['Sugary cereals','Added sugar dogs don\'t need'],
+      ['Anything with xylitol','Toxic — check ingredient labels on packaged carbs'],
+    ],
+    note:"Carbs aren't strictly essential for dogs the way protein and fat are, but they're a useful, efficient energy source in a balanced diet."
+  },
+  fiber: {
+    icon:'🌿', iconBg:'#DCF2D8', color:'#5FAE5C',
+    title:'Fiber', tag:'Promotes healthy digestion and stool quality',
+    sections:[
+      { heading:'Great sources', items:[
+        ['Pumpkin (plain puree)','Soluble fiber — helps firm up loose stool'],
+        ['Green beans','Low-calorie, cooked or raw, plain'],
+        ['Apples','Sliced, seeds and core removed — fiber and vitamin C'],
+        ['Oats','Cooked plain — soluble fiber'],
+        ['Sweet potato','Cooked, no skin — fiber plus vitamin A'],
+        ['Leafy greens','Spinach or kale, small amounts, cooked'],
+      ]},
+    ],
+    avoid:[
+      ['Too much, too fast','Sudden high-fiber intake can cause gas or loose stool'],
+      ['Corn cobs & inedible fiber','Not digestible — real blockage risk'],
+      ['Human high-fiber cereals','Often contain raisins, chocolate, or xylitol'],
+    ],
+    note:"Introduce new fiber sources gradually — a sudden increase, even from a healthy food, can upset a dog's stomach."
+  },
+  fat: {
+    icon:'<img src="./assets/avocado-icon.png" alt="Healthy Fat" style="width:28px;height:auto;">', iconBg:'#FBF2C7', color:'#B99A1F',
+    title:'Healthy Fat', tag:'Supports skin, coat, brain, and joint health',
+    sections:[
+      { heading:'Great sources', items:[
+        ['Salmon / fish oil','Cooked fish or a vet-dosed supplement — omega-3 EPA/DHA'],
+        ['Sardines & mackerel','Cooked or canned in water — omega-3 plus calcium'],
+        ['Ground flaxseed','Small amount, fresh-ground — plant-based omega-3'],
+        ['Avocado flesh (ripe)','Small amount, no skin or pit — many owners skip it entirely since reactions vary; skip if unsure'],
+        ['Chicken fat (rendered)','Small amount — energy-dense, useful for very active dogs'],
+      ]},
+    ],
+    avoid:[
+      ['Fried or greasy human food','High pancreatitis risk'],
+      ['Bacon grease / meat trimmings','Very high fat load in one go — same pancreatitis risk'],
+      ['Butter & excess cooking oil','Calorie-dense with little nutritional benefit'],
+      ['Macadamia nuts','Toxic — causes weakness, tremors, and vomiting'],
+    ],
+    note:"Fat is calorie-dense — great in small amounts, but easy to overfeed. Introduce new fats gradually and keep portions modest."
+  }
+};
+
+function renderDetail(key){
+  const data = NUTRIENT_DETAILS[key];
+  const card = document.getElementById('detailScroll');
+  if(!data){
+    card.innerHTML = `
+      <button class="detail-close" id="detailClose">✕</button>
+      <div class="detail-head">
+        <div class="detail-icon" style="background:#EFF3F6; color:#5A6E80;">🔧</div>
+        <h2>Coming soon</h2>
+      </div>
+      <p class="detail-tag">This nutrient's detail page isn't built yet — check back soon.</p>
+    `;
+  } else {
+    const sectionsHtml = data.sections.map(s => `
+      <div class="detail-section">
+        <h3>${s.heading}</h3>
+        <div class="food-grid">
+          ${s.items.map(([n,d]) => `<div class="food-item"><b>${n}</b><span>${d}</span></div>`).join('')}
+        </div>
+      </div>
+    `).join('');
+    const avoidHtml = data.avoid ? `
+      <div class="detail-section avoid">
+        <h3>Avoid</h3>
+        <div class="food-grid">
+          ${data.avoid.map(([n,d]) => `<div class="food-item"><b>${n}</b><span>${d}</span></div>`).join('')}
+        </div>
+      </div>
+    ` : '';
+    card.innerHTML = `
+      <button class="detail-close" id="detailClose">✕</button>
+      <div class="detail-head">
+        <div class="detail-icon" style="background:${data.iconBg}; color:${data.color};">${data.icon}</div>
+        <h2>${data.title}</h2>
+      </div>
+      <p class="detail-tag">${data.tag}</p>
+      ${sectionsHtml}
+      ${avoidHtml}
+      <div class="detail-note">${data.note}</div>
+    `;
+  }
+  document.getElementById('detailClose').addEventListener('click', closeDetail);
+}
+
+const detailOverlay = document.getElementById('detailOverlay');
+function openDetail(key){
+  renderDetail(key);
+  detailOverlay.classList.add('open');
+}
+function closeDetail(){
+  detailOverlay.classList.remove('open');
+}
+detailOverlay.addEventListener('click', e=>{
+  if(e.target === detailOverlay) closeDetail();
+});
+
+/* island click -> zoom transition into detail panel */
+document.querySelectorAll('.island').forEach(el=>{
+  el.addEventListener('click', ()=>{
+    const key = el.dataset.key;
+    el.classList.add('zooming');
+    orbitWrap.classList.add('zoom-out');
+    setTimeout(()=>{
+      openDetail(key);
+      el.classList.remove('zooming');
+      orbitWrap.classList.remove('zoom-out');
+    }, 650);
+  });
+});
+</script>
+</body>
+</html>

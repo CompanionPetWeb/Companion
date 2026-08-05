@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>Companion — Feeding Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  html{ color-scheme:light; }
+  :root{
+    --sky1:#BFE0F5; --sky2:#EAF4FB; --sky3:#DCEEF7;
+    --ink:#12283B; --ink-dim:#4C6478;
+    --accent:#4F8FE0; --accent-dim:#D7E7FB;
+  }
+  *{margin:0; padding:0; box-sizing:border-box;}
+  body{
+    font-family:'Inter',sans-serif;
+    color:var(--ink);
+    background:linear-gradient(180deg, var(--sky1) 0%, var(--sky3) 45%, var(--sky2) 100%);
+    min-height:100vh;
+    position:relative;
+  }
+  .bg-photo{
+    position:fixed; inset:0; width:100%; height:100%;
+    object-fit:cover; z-index:-2;
+  }
+  .bg-scrim{
+    position:fixed; inset:0; z-index:-1;
+    background:linear-gradient(180deg, rgba(191,224,245,0.82), rgba(220,238,247,0.88));
+  }
+  .display{font-family:'Space Grotesk',sans-serif;}
+
+  nav{
+    position:sticky; top:0; z-index:20;
+    display:flex; justify-content:space-between; align-items:center;
+    padding:20px 5vw;
+    background:rgba(255,255,255,0.65);
+    backdrop-filter:blur(10px);
+  }
+  .brand{
+    display:flex; align-items:center; gap:10px; font-family:'Space Grotesk',sans-serif; font-weight:700;
+    font-size:1.15rem; color:var(--ink);
+  }
+  .brand .badge{
+    width:36px; height:36px; border-radius:11px; background:#fff;
+    display:flex; align-items:center; justify-content:center; font-size:1.2rem;
+    box-shadow:0 4px 14px rgba(20,50,60,0.1);
+  }
+  nav ul{list-style:none; display:flex; gap:38px;}
+  nav ul li{ position:relative; }
+  nav ul a{ text-decoration:none; color:var(--ink); font-size:0.94rem; font-weight:600; }
+  nav ul li.active::after{
+    content:''; position:absolute; left:50%; bottom:-10px; transform:translateX(-50%);
+    width:5px; height:5px; border-radius:50%; background:#E76B4E;
+  }
+  .back-btn{
+    background:transparent; color:var(--ink); border:1.5px solid rgba(18,40,59,0.25); border-radius:100px;
+    padding:11px 24px; font-size:0.88rem; font-weight:600; cursor:pointer;
+    display:flex; align-items:center; gap:8px; font-family:'Inter',sans-serif;
+    text-decoration:none; transition:background .2s;
+  }
+  .back-btn:hover{ background:rgba(255,255,255,0.5); }
+
+  .hero{ max-width:700px; margin:0 auto; padding:50px 5vw 10px; text-align:center; }
+  .eyebrow{
+    display:inline-block; background:rgba(255,255,255,0.85); color:var(--accent);
+    padding:8px 18px; border-radius:100px; font-size:0.8rem; font-weight:700;
+    margin-bottom:20px; box-shadow:0 4px 14px rgba(20,50,60,0.08);
+  }
+  .hero h1{
+    font-family:'Space Grotesk',sans-serif; font-weight:700;
+    font-size:clamp(2rem, 4.4vw, 2.8rem); line-height:1.1; margin-bottom:14px; color:var(--ink);
+  }
+  .hero p{ color:var(--ink-dim); font-size:1rem; line-height:1.6; max-width:52ch; margin:0 auto; }
+
+  .wrap{ max-width:640px; margin:0 auto; padding:40px 5vw 100px; }
+
+  .calc-card{
+    background:rgba(255,255,255,0.9); border-radius:28px;
+    padding:38px 40px; box-shadow:0 20px 50px rgba(20,50,60,0.1);
+    margin-bottom:24px;
+  }
+  .field{ margin-bottom:22px; }
+  .field label{
+    display:block; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:0.9rem;
+    margin-bottom:10px; color:var(--ink);
+  }
+  .weight-row{ display:flex; gap:10px; }
+  .weight-row input[type="number"]{
+    flex:1; padding:13px 16px; border-radius:14px; border:1.5px solid #E2E8ED;
+    font-size:1rem; font-family:'Inter',sans-serif; color:var(--ink);
+    outline:none; transition:border-color .2s;
+  }
+  .weight-row input[type="number"]:focus{ border-color:var(--accent); }
+  .unit-toggle{ display:flex; border-radius:14px; overflow:hidden; border:1.5px solid #E2E8ED; }
+  .unit-toggle button{
+    padding:0 18px; border:none; background:#fff; color:var(--ink-dim);
+    font-family:'Inter',sans-serif; font-weight:600; font-size:0.9rem; cursor:pointer;
+  }
+  .unit-toggle button.active{ background:var(--accent); color:#fff; }
+
+  .option-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .option-grid.three{ grid-template-columns:1fr 1fr 1fr; }
+  .opt{
+    padding:13px 10px; border-radius:14px; border:1.5px solid #E2E8ED;
+    background:#fff; text-align:center; cursor:pointer;
+    font-size:0.85rem; font-weight:600; color:var(--ink-dim);
+    transition:all .15s;
+  }
+  .opt:hover{ border-color:var(--accent); }
+  .opt.selected{ background:var(--accent); border-color:var(--accent); color:#fff; }
+
+  .calc-btn{
+    width:100%; background:var(--ink); color:#fff; border:none; border-radius:100px;
+    padding:16px; font-size:1rem; font-weight:700; cursor:pointer; font-family:'Space Grotesk',sans-serif;
+    margin-top:6px; transition:background .2s;
+  }
+  .calc-btn:hover{ background:#0A1C2B; }
+
+  .result{
+    background:rgba(255,255,255,0.9); border-radius:28px;
+    padding:38px 40px; box-shadow:0 20px 50px rgba(20,50,60,0.1);
+    display:none;
+  }
+  .result.show{ display:block; animation:fadeUp .4s ease; }
+  @keyframes fadeUp{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+  .result h3{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.2rem; margin-bottom:20px; }
+  .result-stats{ display:flex; gap:16px; margin-bottom:20px; flex-wrap:wrap; }
+  .stat-box{
+    flex:1; min-width:140px; background:var(--accent-dim); border-radius:16px; padding:18px;
+  }
+  .stat-box .val{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.6rem; color:var(--ink); }
+  .stat-box .lbl{ font-size:0.78rem; color:var(--ink-dim); margin-top:2px; }
+  .result-note{
+    background:#F0F6FF; border-radius:14px; padding:14px 18px;
+    font-size:0.85rem; color:#3A5570; line-height:1.55;
+  }
+  .result-note b{ color:var(--ink); }
+
+  footer{ text-align:center; padding:0 5vw 60px; color:var(--ink-dim); font-size:0.82rem; }
+
+  @media (max-width:560px){
+    .calc-card, .result{ padding:28px 22px; }
+    .option-grid.three{ grid-template-columns:1fr 1fr; }
+    nav ul{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+<img class="bg-photo" src="./assets/calculator-bg.jpg" alt="">
+<div class="bg-scrim"></div>
+
+
+<nav>
+  <div class="brand"><span class="badge">🐾</span>Companion</div>
+  <ul>
+    <li><a href="./dog-islands.html">Home</a></li>
+    <li><a href="./nutrition.html">Nutrition</a></li>
+    <li class="active"><a href="./feeding-calculator.html">Calculator</a></li>
+    <li><a href="./meals.html">Meals</a></li>
+    <li><a href="./exercise.html">Exercise</a></li>
+    <li><a href="#">About Us</a></li>
+  </ul>
+  <a class="back-btn" href="./dog-islands.html">← Back</a>
+</nav>
+
+<div class="hero">
+  <span class="eyebrow">Plug In Your Dog</span>
+  <h1>How much should your dog eat?</h1>
+  <p>A quick estimate of daily calories and portion size based on weight, life stage, and activity level.</p>
+</div>
+
+<div class="wrap">
+  <div class="calc-card">
+    <div class="field">
+      <label>Weight</label>
+      <div class="weight-row">
+        <input type="number" id="weightInput" placeholder="e.g. 25" min="0" step="0.1">
+        <div class="unit-toggle">
+          <button id="unitKg" class="active">kg</button>
+          <button id="unitLb">lb</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Life stage</label>
+      <div class="option-grid three" id="stageGroup">
+        <div class="opt selected" data-stage="puppy">Puppy</div>
+        <div class="opt" data-stage="adult">Adult</div>
+        <div class="opt" data-stage="senior">Senior</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Activity level</label>
+      <div class="option-grid three" id="activityGroup">
+        <div class="opt" data-activity="low">Low</div>
+        <div class="opt selected" data-activity="moderate">Moderate</div>
+        <div class="opt" data-activity="high">Active</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Spayed / neutered?</label>
+      <div class="option-grid" id="fixedGroup">
+        <div class="opt selected" data-fixed="yes">Yes</div>
+        <div class="opt" data-fixed="no">No / not sure</div>
+      </div>
+    </div>
+
+    <button class="calc-btn" id="calcBtn">Calculate →</button>
+  </div>
+
+  <div class="result" id="resultCard">
+    <h3>Your dog's estimate</h3>
+    <div class="result-stats">
+      <div class="stat-box">
+        <div class="val" id="calorieVal">—</div>
+        <div class="lbl">calories / day</div>
+      </div>
+      <div class="stat-box">
+        <div class="val" id="cupVal">—</div>
+        <div class="lbl">cups of dry food / day*</div>
+      </div>
+      <div class="stat-box">
+        <div class="val" id="mealVal">—</div>
+        <div class="lbl">recommended meals / day</div>
+      </div>
+    </div>
+    <div class="result-note">
+      *Cup estimate assumes an average dry kibble at ~350 kcal/cup — <b>check your specific food's label</b>, since calorie density varies a lot by brand. This is a general starting point, not a substitute for veterinary advice — especially for puppies, pregnant/nursing dogs, or any dog with a health condition.
+    </div>
+  </div>
+</div>
+
+<footer>General guidance only — always confirm portions with a veterinarian who knows your dog.</footer>
+
+<script>
+let unit = 'kg';
+let stage = 'puppy';
+let activity = 'moderate';
+let fixed = 'yes';
+
+document.getElementById('unitKg').addEventListener('click', ()=>{
+  unit='kg';
+  document.getElementById('unitKg').classList.add('active');
+  document.getElementById('unitLb').classList.remove('active');
+});
+document.getElementById('unitLb').addEventListener('click', ()=>{
+  unit='lb';
+  document.getElementById('unitLb').classList.add('active');
+  document.getElementById('unitKg').classList.remove('active');
+});
+
+function wireGroup(groupId, dataAttr, setter){
+  document.querySelectorAll('#'+groupId+' .opt').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      document.querySelectorAll('#'+groupId+' .opt').forEach(o=>o.classList.remove('selected'));
+      el.classList.add('selected');
+      setter(el.dataset[dataAttr]);
+    });
+  });
+}
+wireGroup('stageGroup','stage', v=>stage=v);
+wireGroup('activityGroup','activity', v=>activity=v);
+wireGroup('fixedGroup','fixed', v=>fixed=v);
+
+document.getElementById('calcBtn').addEventListener('click', ()=>{
+  const raw = parseFloat(document.getElementById('weightInput').value);
+  if(!raw || raw <= 0){
+    document.getElementById('weightInput').style.borderColor = '#E76B4E';
+    return;
+  }
+  document.getElementById('weightInput').style.borderColor = '#E2E8ED';
+
+  const kg = unit === 'kg' ? raw : raw * 0.453592;
+  const rer = 70 * Math.pow(kg, 0.75);
+
+  // activity/life-stage factor
+  let factor;
+  if(stage === 'puppy'){
+    factor = kg < 2 ? 3.0 : 2.5; // very young vs older puppy, rough split
+  } else if(stage === 'senior'){
+    factor = activity === 'high' ? 1.6 : activity === 'low' ? 1.2 : 1.4;
+  } else { // adult
+    const base = fixed === 'yes' ? 1.6 : 1.8;
+    factor = activity === 'high' ? base + 0.6 : activity === 'low' ? base - 0.4 : base;
+  }
+
+  const calories = Math.round(rer * factor);
+  const cups = (calories / 350).toFixed(1);
+  const meals = stage === 'puppy' ? 3 : 2;
+
+  document.getElementById('calorieVal').textContent = calories.toLocaleString();
+  document.getElementById('cupVal').textContent = cups;
+  document.getElementById('mealVal').textContent = meals;
+  document.getElementById('resultCard').classList.add('show');
+  document.getElementById('resultCard').scrollIntoView({behavior:'smooth', block:'nearest'});
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>Companion — Cat Nutrition Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  html{ color-scheme:light; }
+  :root{
+    --sky1:#BFE0F5; --sky2:#EAF4FB; --sky3:#DCEEF7;
+    --ink:#12283B; --ink-dim:#4C6478;
+    --protein:#E76B4E; --vitamin:#4F8FE0; --mineral:#3FB8D8;
+    --carb:#E0A93F; --fiber:#5FAE5C; --fat:#B99A1F;
+  }
+  *{margin:0; padding:0; box-sizing:border-box;}
+  body{
+    font-family:'Inter',sans-serif;
+    color:var(--ink);
+    background:linear-gradient(180deg, var(--sky1) 0%, var(--sky3) 45%, var(--sky2) 100%);
+    min-height:100vh;
+    position:relative;
+  }
+  .bg-photo{
+    position:fixed; inset:0; width:100%; height:100%;
+    object-fit:cover; z-index:-2;
+  }
+  .bg-scrim{
+    position:fixed; inset:0; z-index:-1;
+    background:linear-gradient(180deg, rgba(191,224,245,0.55), rgba(220,238,247,0.6));
+  }
+  .display{font-family:'Space Grotesk',sans-serif;}
+
+  nav{
+    position:sticky; top:0; z-index:20;
+    display:flex; justify-content:space-between; align-items:center;
+    padding:20px 5vw;
+    background:rgba(255,255,255,0.65);
+    backdrop-filter:blur(10px);
+  }
+  .brand{
+    display:flex; align-items:center; gap:10px; font-family:'Space Grotesk',sans-serif; font-weight:700;
+    font-size:1.15rem; color:var(--ink);
+  }
+  .brand .badge{
+    width:36px; height:36px; border-radius:11px; background:#fff;
+    display:flex; align-items:center; justify-content:center; font-size:1.2rem;
+    box-shadow:0 4px 14px rgba(20,50,60,0.1);
+  }
+  nav ul{list-style:none; display:flex; gap:38px;}
+  nav ul li{ position:relative; }
+  nav ul a{ text-decoration:none; color:var(--ink); font-size:0.94rem; font-weight:600; }
+  nav ul li.active::after{
+    content:''; position:absolute; left:50%; bottom:-10px; transform:translateX(-50%);
+    width:5px; height:5px; border-radius:50%; background:var(--protein);
+  }
+  .back-btn{
+    background:transparent; color:var(--ink); border:1.5px solid rgba(18,40,59,0.25); border-radius:100px;
+    padding:11px 24px; font-size:0.88rem; font-weight:600; cursor:pointer;
+    display:flex; align-items:center; gap:8px; font-family:'Inter',sans-serif;
+    text-decoration:none; transition:background .2s;
+  }
+  .back-btn:hover{ background:rgba(255,255,255,0.5); }
+
+  .hero{
+    max-width:900px; margin:0 auto; padding:60px 5vw 20px; text-align:center;
+  }
+  .eyebrow{
+    display:inline-block; background:rgba(255,255,255,0.85); color:var(--protein);
+    padding:8px 18px; border-radius:100px; font-size:0.8rem; font-weight:700;
+    margin-bottom:20px; box-shadow:0 4px 14px rgba(20,50,60,0.08);
+  }
+  .hero h1{
+    font-family:'Space Grotesk',sans-serif; font-weight:700;
+    font-size:clamp(2.2rem, 4.6vw, 3.2rem); line-height:1.08; margin-bottom:16px; color:var(--ink);
+  }
+  .hero p{ color:var(--ink-dim); font-size:1.05rem; line-height:1.6; max-width:56ch; margin:0 auto; }
+
+  .search-wrap{
+    max-width:640px; margin:28px auto 0; padding:0 5vw;
+    position:relative;
+  }
+  .search-box{
+    display:flex; align-items:center; gap:12px;
+    background:rgba(255,255,255,0.92); border-radius:100px;
+    padding:14px 22px; box-shadow:0 10px 30px rgba(20,50,60,0.1);
+    border:1.5px solid transparent; transition:border-color .2s;
+  }
+  .search-box:focus-within{ border-color:var(--vitamin); }
+  .search-box .prefix{
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:0.95rem;
+    color:var(--ink); white-space:nowrap;
+  }
+  .search-box input{
+    flex:1; min-width:0; border:none; outline:none; background:transparent;
+    font-family:'Inter',sans-serif; font-size:0.95rem; color:var(--ink);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .search-box input::placeholder{ color:#9AAAB6; }
+  .search-clear{
+    border:none; background:#EFF3F6; color:var(--ink-dim); border-radius:50%;
+    width:24px; height:24px; cursor:pointer; font-size:0.75rem; display:none;
+    align-items:center; justify-content:center; flex:none;
+  }
+  .search-clear.show{ display:flex; }
+  .search-results{
+    position:absolute; top:calc(100% + 10px); left:5vw; right:5vw;
+    background:#fff; border-radius:20px; box-shadow:0 20px 50px rgba(20,50,60,0.18);
+    max-height:360px; overflow-y:auto; z-index:30;
+    display:none;
+  }
+  .search-results.show{ display:block; }
+  .sr-item{
+    display:flex; align-items:center; gap:12px; padding:13px 20px;
+    cursor:pointer; border-bottom:1px solid #F0F3F5;
+  }
+  .sr-item:last-child{ border-bottom:none; }
+  .sr-item:hover{ background:#F7F9FA; }
+  .sr-dot{ width:9px; height:9px; border-radius:50%; flex:none; }
+  .sr-text b{ display:block; font-family:'Space Grotesk',sans-serif; font-size:0.92rem; color:var(--ink); }
+  .sr-text span{ font-size:0.78rem; color:var(--ink-dim); }
+  .sr-empty{ padding:20px; text-align:center; color:var(--ink-dim); font-size:0.88rem; }
+  .food-item.highlight{
+    outline:2.5px solid var(--vitamin); outline-offset:2px;
+    animation:pulseHighlight 1.6s ease 1;
+  }
+  @keyframes pulseHighlight{
+    0%,100%{ background:#F7F9FA; } 30%{ background:#E4F0FE; }
+  }
+
+  .jumpnav{
+    display:flex; flex-wrap:wrap; justify-content:center; gap:10px;
+    max-width:900px; margin:24px auto 0; padding:0 5vw;
+  }
+  .jumpnav a{
+    text-decoration:none; display:inline-flex; align-items:center; gap:8px;
+    background:rgba(255,255,255,0.75); color:var(--ink);
+    padding:9px 16px; border-radius:100px; font-size:0.85rem; font-weight:600;
+    box-shadow:0 4px 14px rgba(20,50,60,0.06);
+  }
+  .jumpnav .dot{ width:8px; height:8px; border-radius:50%; }
+
+  .sections{ max-width:900px; margin:0 auto; padding:50px 5vw 100px; }
+  .n-section{
+    background:rgba(255,255,255,0.85); border-radius:28px;
+    padding:40px 44px; margin-bottom:28px;
+    box-shadow:0 20px 50px rgba(20,50,60,0.08);
+    scroll-margin-top:90px;
+  }
+  .n-head{ display:flex; align-items:center; gap:16px; margin-bottom:6px; }
+  .n-icon{
+    width:52px; height:52px; border-radius:16px; flex:none;
+    display:flex; align-items:center; justify-content:center; font-size:1.6rem;
+  }
+  .n-head h2{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.7rem; color:var(--ink); }
+  .n-tag{ color:var(--ink-dim); font-size:0.95rem; margin-bottom:26px; }
+  .n-sub{
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1rem; color:var(--ink);
+    margin-bottom:12px; display:flex; align-items:center; gap:8px;
+  }
+  .n-sub::before{ content:''; width:8px; height:8px; border-radius:2px; display:inline-block; }
+  .food-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:24px; }
+  .food-item{
+    background:#F7F9FA; border-radius:14px; padding:12px 16px;
+    font-size:0.92rem; color:#2A3B4A;
+  }
+  .food-item b{ display:block; font-family:'Space Grotesk',sans-serif; font-size:0.95rem; margin-bottom:2px; color:var(--ink); }
+  .food-item span{ font-size:0.8rem; color:#6B7C8A; line-height:1.4; }
+  .avoid .n-sub::before{ background:#C4664A; }
+  .avoid .food-item{ background:#FBEEEA; }
+  .n-note{
+    background:#F0F6FF; border-radius:14px; padding:14px 18px;
+    font-size:0.85rem; color:#3A5570; line-height:1.5;
+  }
+
+  footer{
+    text-align:center; padding:40px 5vw 60px; color:var(--ink-dim); font-size:0.82rem;
+  }
+
+  @media (max-width:640px){
+    .food-grid{ grid-template-columns:1fr; }
+    .n-section{ padding:28px 22px; }
+    nav ul{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+<img class="bg-photo" src="./assets/nutrition-bg.png" alt="">
+<div class="bg-scrim"></div>
+
+
+<nav>
+  <div class="brand"><span class="badge">🐾</span>Companion</div>
+  <ul>
+    <li><a href="./cat-islands.html">Home</a></li>
+    <li class="active"><a href="./nutrition.html">Nutrition</a></li>
+    <li><a href="./feeding-calculator-cat.html">Calculator</a></li>
+    <li><a href="./meals-cat.html">Meals</a></li>
+    <li><a href="#">About Us</a></li>
+  </ul>
+  <a class="back-btn" href="./cat-islands.html">← Back</a>
+</nav>
+
+<div class="hero">
+  <span class="eyebrow">The Full Reference</span>
+  <h1>Everything your cat needs, in one place</h1>
+  <p>If a food isn't listed here, play it safe and treat it as a "check with your vet first" — this covers the essentials, not every food out there.</p>
+</div>
+
+<div class="search-wrap">
+  <div class="search-box">
+    <span class="prefix">Can my cat eat:</span>
+    <input type="text" id="foodSearch" placeholder="e.g. tuna, liver, lily">
+    <button class="search-clear" id="searchClear">✕</button>
+  </div>
+  <div class="search-results" id="searchResults"></div>
+</div>
+
+<div class="jumpnav">
+  <a href="#protein"><span class="dot" style="background:var(--protein)"></span>Protein</a>
+  <a href="#vitamin"><span class="dot" style="background:var(--vitamin)"></span>Vitamin</a>
+  <a href="#mineral"><span class="dot" style="background:var(--mineral)"></span>Mineral</a>
+  <a href="#carb"><span class="dot" style="background:var(--carb)"></span>Carbohydrate</a>
+  <a href="#fiber"><span class="dot" style="background:var(--fiber)"></span>Fiber</a>
+  <a href="#fat"><span class="dot" style="background:var(--fat)"></span>Healthy Fat</a>
+</div>
+
+<div class="sections">
+
+  <div class="n-section" id="protein">
+    <div class="n-head">
+      <div class="n-icon" style="background:#FFD9CC; color:var(--protein);"><img src="./assets/steak-icon.png" alt="Protein" style="width:28px;height:auto;"></div>
+      <h2>Protein</h2>
+    </div>
+    <p class="n-tag">The core of a cat's diet — builds muscle and supplies taurine</p>
+
+    <div class="n-sub">Muscle meats</div>
+    <div class="food-grid">
+      <div class="food-item"><b>Chicken</b><span>Skinless, cooked plain — a cat diet staple</span></div>
+      <div class="food-item"><b>Turkey</b><span>Lean and easy to digest, cooked plain</span></div>
+      <div class="food-item"><b>Beef</b><span>Lean cuts, cooked, fat trimmed off</span></div>
+      <div class="food-item"><b>Rabbit</b><span>Lean, novel protein — good for sensitive cats</span></div>
+      <div class="food-item"><b>Duck</b><span>Cooked, skin removed — good for variety</span></div>
+    </div>
+
+    <div class="n-sub">Organ meats (feed regularly, in moderation)</div>
+    <div class="food-grid">
+      <div class="food-item"><b>Heart</b><span>One of the richest natural sources of taurine — cats need this daily</span></div>
+      <div class="food-item"><b>Liver</b><span>Rich in vitamin A — small amounts, ~5% of diet max</span></div>
+      <div class="food-item"><b>Kidney</b><span>Nutrient-dense, cooked, small portions</span></div>
+    </div>
+
+    <div class="n-sub">Seafood (occasional, not a staple)</div>
+    <div class="food-grid">
+      <div class="food-item"><b>Cooked fish (salmon, tuna)</b><span>Deboned, plain — not the main diet</span></div>
+      <div class="food-item"><b>Sardines (in water)</b><span>Small amounts — omega-3 plus taurine</span></div>
+    </div>
+
+    <div class="n-sub">Eggs &amp; bones</div>
+    <div class="food-grid">
+      <div class="food-item"><b>Whole eggs</b><span>Fully cooked — scrambled or boiled, no salt</span></div>
+      <div class="food-item"><b>Raw chicken necks</b><span>Sized for a cat, supervised — natural teeth cleaning</span></div>
+    </div>
+
+    <div class="n-sub avoid" style="margin-top:4px;">Avoid</div>
+    <div class="food-grid avoid">
+      <div class="food-item"><b>Raw fish as a regular diet</b><span>Contains thiaminase, destroys vitamin B1 over time</span></div>
+      <div class="food-item"><b>Excess liver/organ meat</b><span>Vitamin A builds up and can become toxic</span></div>
+      <div class="food-item"><b>Cooked bones</b><span>Splinter easily — choking/gut injury risk</span></div>
+      <div class="food-item"><b>Fish-only diets</b><span>Missing nutrients from muscle/organ meat</span></div>
+    </div>
+
+    <div class="n-note">Cats are obligate carnivores — unlike dogs, they need taurine from animal tissue every day, since their bodies can't make enough on their own. A taurine-deficient diet can lead to serious heart disease over time.</div>
+  </div>
+
+  <div class="n-section" id="vitamin">
+    <div class="n-head">
+      <div class="n-icon" style="background:#D7E7FB; color:var(--vitamin);"><img src="./assets/broccoli-icon.png" alt="Vitamin" style="width:28px;height:auto;"></div>
+      <h2>Vitamin</h2>
+    </div>
+    <p class="n-tag">Supports vision, immune health, and skin — mostly from animal sources</p>
+
+    <div class="n-sub">Animal-based sources (most important for cats)</div>
+    <div class="food-grid">
+      <div class="food-item"><b>Liver (small amounts)</b><span>Preformed vitamin A — cats can't convert plant beta-carotene like dogs can</span></div>
+      <div class="food-item"><b>Egg yolk</b><span>Cooked — vitamin A, D, and B12</span></div>
+      <div class="food-item"><b>Fish / fish oil</b><span>Cooked — vitamin D and E</span></div>
+    </div>
+
+    <div class="n-sub">Small plant additions (occasional extras only)</div>
+    <div class="food-grid">
+      <div class="food-item"><b>Cooked pumpkin</b><span>Plain puree, small amount</span></div>
+      <div class="food-item"><b>Cooked carrots</b><span>Small amount, mashed — minor direct benefit</span></div>
+    </div>
+
+    <div class="n-sub avoid" style="margin-top:4px;">Avoid</div>
+    <div class="food-grid avoid">
+      <div class="food-item"><b>Lily plants (all parts)</b><span>Extremely toxic to cats specifically — can cause fatal kidney failure</span></div>
+      <div class="food-item"><b>Onions, garlic, chives</b><span>Damage red blood cells, even cooked</span></div>
+      <div class="food-item"><b>Grapes &amp; raisins</b><span>Best avoided even though the risk is less proven in cats</span></div>
+      <div class="food-item"><b>Raw potato / green tomato</b><span>Solanine in unripe/green parts is toxic</span></div>
+    </div>
+
+    <div class="n-note">Cats process vitamins differently than dogs — most notably, they can't efficiently turn plant-based beta-carotene into vitamin A, so animal sources like liver and egg yolk matter far more than vegetables do.</div>
+  </div>
+
+  <div class="n-section" id="mineral">
+    <div class="n-head">
+      <div class="n-icon" style="background:#CFF1F7; color:var(--mineral);">💠</div>
+      <h2>Mineral</h2>
+    </div>
+    <p class="n-tag">Strengthens bones and teeth, supports nerve and muscle function</p>
+
+    <div class="n-sub">Great sources</div>
+    <div class="food-grid">
+      <div class="food-item"><b>Sardines (with bone)</b><span>Calcium, phosphorus, omega-3</span></div>
+      <div class="food-item"><b>Raw chicken necks</b><span>Natural calcium and phosphorus, raw only</span></div>
+      <div class="food-item"><b>Eggshell (ground)</b><span>A pinch — concentrated calcium</span></div>
+    </div>
+
+    <div class="n-sub avoid" style="margin-top:4px;">Avoid</div>
+    <div class="food-grid avoid">
+      <div class="food-item"><b>Excess magnesium/mineral supplements</b><span>Linked to urinary crystal formation (FLUTD) in some cats</span></div>
+      <div class="food-item"><b>Calcium supplements without guidance</b><span>Can throw off the calcium-phosphorus balance</span></div>
+    </div>
+
+    <div class="n-note">Mineral balance matters even more for cats than dogs because of urinary tract sensitivity — some cats are prone to crystals or blockages. Any supplementation should go through a vet.</div>
+  </div>
+
+  <div class="n-section" id="carb">
+    <div class="n-head">
+      <div class="n-icon" style="background:#FBEBCB; color:var(--carb);"><img src="./assets/grain-icon.png" alt="Carbohydrate" style="width:28px;height:auto;"></div>
+      <h2>Carbohydrate</h2>
+    </div>
+    <p class="n-tag">Cats need very little — protein and fat are their main fuel</p>
+
+    <div class="n-sub">Acceptable in small amounts</div>
+    <div class="food-grid">
+      <div class="food-item"><b>Cooked white rice</b><span>Plain, small amount — gentle if needed</span></div>
+      <div class="food-item"><b>Cooked pumpkin</b><span>Plain puree — more for fiber than energy</span></div>
+    </div>
+
+    <div class="n-sub avoid" style="margin-top:4px;">Avoid</div>
+    <div class="food-grid avoid">
+      <div class="food-item"><b>Grain-heavy diets as the main food</b><span>Linked to obesity and diabetes in cats</span></div>
+      <div class="food-item"><b>Bread &amp; pasta</b><span>Refined, little nutritional value for a cat</span></div>
+      <div class="food-item"><b>Corn on the cob</b><span>Choking/blockage hazard</span></div>
+    </div>
+
+    <div class="n-note">Unlike dogs, cats are obligate carnivores with almost no dietary need for carbohydrates. Their bodies are built to run on protein and fat.</div>
+  </div>
+
+  <div class="n-section" id="fiber">
+    <div class="n-head">
+      <div class="n-icon" style="background:#DCF2D8; color:var(--fiber);">🌿</div>
+      <h2>Fiber</h2>
+    </div>
+    <p class="n-tag">Supports digestion and helps manage hairballs</p>
+
+    <div class="n-sub">Great sources</div>
+    <div class="food-grid">
+      <div class="food-item"><b>Cooked pumpkin</b><span>The classic choice — helps stool quality and hairballs</span></div>
+      <div class="food-item"><b>Psyllium husk (vet-guided)</b><span>Sometimes used for chronic hairball/constipation issues</span></div>
+      <div class="food-item"><b>Green beans</b><span>Low-calorie, cooked or raw, plain</span></div>
+    </div>
+
+    <div class="n-sub avoid" style="margin-top:4px;">Avoid</div>
+    <div class="food-grid avoid">
+      <div class="food-item"><b>Too much, too fast</b><span>Can cause loose stool or gas</span></div>
+      <div class="food-item"><b>Corn cobs</b><span>Not digestible — real blockage risk</span></div>
+    </div>
+
+    <div class="n-note">Fiber is especially useful for cats prone to hairballs — pumpkin is the most common go-to, but introduce it gradually.</div>
+  </div>
+
+  <div class="n-section" id="fat">
+    <div class="n-head">
+      <div class="n-icon" style="background:#FBF2C7; color:var(--fat);"><img src="./assets/avocado-icon.png" alt="Healthy Fat" style="width:28px;height:auto;"></div>
+      <h2>Healthy Fat</h2>
+    </div>
+    <p class="n-tag">Supports skin, coat, and energy — cats need more fat than dogs relative to size</p>
+
+    <div class="n-sub">Great sources</div>
+    <div class="food-grid">
+      <div class="food-item"><b>Fish oil (vet-dosed)</b><span>Omega-3 EPA/DHA — skin, coat, and joints</span></div>
+      <div class="food-item"><b>Sardines (in water)</b><span>Omega-3 plus calcium</span></div>
+      <div class="food-item"><b>Chicken fat (rendered)</b><span>Small amount — cats run on higher fat than dogs</span></div>
+    </div>
+
+    <div class="n-sub avoid" style="margin-top:4px;">Avoid</div>
+    <div class="food-grid avoid">
+      <div class="food-item"><b>Fried or greasy food</b><span>High pancreatitis risk — cats can develop it too</span></div>
+      <div class="food-item"><b>Bacon grease / trimmings</b><span>Very high fat load at once</span></div>
+      <div class="food-item"><b>Macadamia &amp; other nuts</b><span>Not part of a cat's natural diet — avoid entirely</span></div>
+    </div>
+
+    <div class="n-note">Cats naturally thrive on a higher proportion of fat than dogs do — still, portions should stay modest and any new fat source should be introduced slowly.</div>
+  </div>
+
+</div>
+
+<footer>General guidance only — always confirm portions, routines, and health concerns with a veterinarian who knows your cat.</footer>
+
+<script>
+/* build a search index from every food-item already on the page */
+const foodIndex = [];
+document.querySelectorAll('.n-section').forEach(section=>{
+  const sectionColor = getComputedStyle(section.querySelector('.n-icon')).color;
+  section.querySelectorAll('.food-item').forEach(item=>{
+    const name = item.querySelector('b')?.textContent || '';
+    const desc = item.querySelector('span')?.textContent || '';
+    const isAvoid = item.closest('.avoid') !== null;
+    foodIndex.push({ el:item, name, desc, isAvoid, color:sectionColor });
+  });
+});
+
+const searchInput = document.getElementById('foodSearch');
+const searchResults = document.getElementById('searchResults');
+const searchClear = document.getElementById('searchClear');
+
+function renderResults(query){
+  const q = query.trim().toLowerCase();
+  if(!q){
+    searchResults.classList.remove('show');
+    searchResults.innerHTML = '';
+    return;
+  }
+  const matches = foodIndex.filter(f =>
+    f.name.toLowerCase().includes(q) || f.desc.toLowerCase().includes(q)
+  ).slice(0, 8);
+
+  if(matches.length === 0){
+    searchResults.innerHTML = `<div class="sr-empty">No exact match — try a different spelling, or check the closest category below.</div>`;
+  } else {
+    searchResults.innerHTML = matches.map((m,i)=>`
+      <div class="sr-item" data-idx="${i}">
+        <span class="sr-dot" style="background:${m.isAvoid ? '#C4664A' : m.color};"></span>
+        <div class="sr-text"><b>${m.name}</b><span>${m.isAvoid ? '⚠ Avoid — ' : ''}${m.desc}</span></div>
+      </div>
+    `).join('');
+    searchResults.querySelectorAll('.sr-item').forEach(row=>{
+      row.addEventListener('click', ()=>{
+        const idx = parseInt(row.dataset.idx);
+        const target = matches[idx].el;
+        target.scrollIntoView({behavior:'smooth', block:'center'});
+        target.classList.remove('highlight');
+        void target.offsetWidth; // restart animation
+        target.classList.add('highlight');
+        searchResults.classList.remove('show');
+        searchInput.value = matches[idx].name;
+      });
+    });
+  }
+  searchResults.classList.add('show');
+}
+
+searchInput.addEventListener('input', ()=>{
+  searchClear.classList.toggle('show', searchInput.value.length > 0);
+  renderResults(searchInput.value);
+});
+searchInput.addEventListener('focus', ()=>{
+  if(searchInput.value) renderResults(searchInput.value);
+});
+searchClear.addEventListener('click', ()=>{
+  searchInput.value = '';
+  searchClear.classList.remove('show');
+  searchResults.classList.remove('show');
+  searchInput.focus();
+});
+document.addEventListener('click', e=>{
+  if(!e.target.closest('.search-wrap')) searchResults.classList.remove('show');
+});
+</script>
+</body>
+</html>
