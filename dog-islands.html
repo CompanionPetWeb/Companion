@@ -609,7 +609,9 @@ const orbitInner = document.getElementById('orbitInner');
 function scaleOrbit(){
   const renderedWidth = orbitWrap.clientWidth;
   const scale = renderedWidth / 860;
-  orbitInner.style.transform = 'translate(-50%, -50%) scale(' + scale + ')';
+  const isMobile = window.innerWidth <= 1150;
+  const shiftX = isMobile ? -renderedWidth * 0.06 : 0;
+  orbitInner.style.transform = 'translate(calc(-50% + ' + shiftX + 'px), -50%) scale(' + scale + ')';
 }
 scaleOrbit();
 window.addEventListener('resize', scaleOrbit);
