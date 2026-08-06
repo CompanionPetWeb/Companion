@@ -610,7 +610,7 @@ function scaleOrbit(){
   const renderedWidth = orbitWrap.clientWidth;
   const scale = renderedWidth / 860;
   const isMobile = window.innerWidth <= 1150;
-  const shiftX = isMobile ? -renderedWidth * 0.06 : 0;
+  const shiftX = isMobile ? -renderedWidth * 0.19 : 0;
   orbitInner.style.transform = 'translate(calc(-50% + ' + shiftX + 'px), -50%) scale(' + scale + ')';
 }
 scaleOrbit();
