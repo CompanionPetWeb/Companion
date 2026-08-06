@@ -75,6 +75,24 @@
   }
   .back-btn:hover{ background:rgba(255,255,255,0.5); }
 
+  .hamburger{
+    display:none; flex-direction:column; justify-content:center; gap:5px;
+    width:38px; height:38px; border-radius:10px; border:1.5px solid rgba(18,40,59,0.25);
+    background:transparent; cursor:pointer; margin-left:10px;
+  }
+  .hamburger span{ display:block; width:18px; height:2px; background:var(--ink); margin:0 auto; border-radius:2px; }
+  .mobile-menu{
+    display:none; flex-direction:column;
+    position:sticky; top:78px; z-index:19;
+    background:rgba(255,255,255,0.96); backdrop-filter:blur(10px);
+    max-height:0; overflow:hidden; transition:max-height .3s ease;
+  }
+  .mobile-menu.open{ max-height:400px; }
+  .mobile-menu a{
+    text-decoration:none; color:var(--ink); font-size:0.95rem; font-weight:600;
+    padding:16px 5vw; border-top:1px solid rgba(18,40,59,0.08);
+  }
+
   .stage{
     position:relative; z-index:2;
     max-width:1600px; margin:0 auto;
@@ -321,12 +339,16 @@
   }
 
   @media (max-width: 1150px){
-    .stage{padding-top:120px; min-height:auto;}
-    .copy{position:relative; left:0; top:0; transform:none; width:100%; text-align:center; margin:0 auto 40px;}
+    .stage{padding-top:120px; padding-bottom:30px; min-height:auto;}
+    .copy{position:relative; left:0; top:0; transform:none; width:100%; text-align:center; margin:0 auto 10px;}
     .copy p{margin-left:auto; margin-right:auto;}
     .cta-row, .stat-row{justify-content:center;}
-    .orbit-wrap{position:relative; right:0; top:0; transform:none; width:100%; max-width:100%; aspect-ratio:860/760; margin:0 auto; }
+    .orbit-wrap{position:relative; right:0; top:0; transform:none; width:100%; max-width:100%; aspect-ratio:860/760; margin:10px auto 0; }
     nav ul{display:none;}
+    .back-btn{display:none;}
+    .hamburger{display:flex;}
+    .mobile-menu{display:flex;}
+    body{overflow-x:hidden;}
   }
   /* NUTRIENT DETAIL PANEL */
   .detail-overlay{
@@ -429,7 +451,18 @@
     <li><a href="#">About Us</a></li>
   </ul>
   <button class="back-btn" onclick="window.history.back()">← Back</button>
+  <button class="hamburger" id="hamburgerBtn" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#">Home</a>
+  <a href="./nutrition.html">Nutrition</a>
+  <a href="./feeding-calculator.html">Calculator</a>
+  <a href="./meals.html">Meals</a>
+  <a href="./exercise.html">Exercise</a>
+  <a href="#">About Us</a>
+</div>
 
 <div class="stage">
   <div class="copy">
@@ -527,6 +560,18 @@
 </div>
 
 <script>
+/* mobile hamburger menu toggle */
+const hamburgerBtn = document.getElementById('hamburgerBtn');
+const mobileMenu = document.getElementById('mobileMenu');
+if(hamburgerBtn){
+  hamburgerBtn.addEventListener('click', function(){
+    mobileMenu.classList.toggle('open');
+  });
+  mobileMenu.querySelectorAll('a').forEach(function(a){
+    a.addEventListener('click', function(){ mobileMenu.classList.remove('open'); });
+  });
+}
+
 /* background parallax — moves subtly opposite the cursor across the whole page */
 const bgLayer = document.getElementById('bgLayer');
 let bgTargetX = 0, bgTargetY = 0, bgCurX = 0, bgCurY = 0;
