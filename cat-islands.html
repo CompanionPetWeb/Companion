@@ -616,6 +616,11 @@ function scaleOrbit(){
 }
 scaleOrbit();
 window.addEventListener('resize', scaleOrbit);
+window.addEventListener('load', scaleOrbit);
+window.addEventListener('orientationchange', function(){ setTimeout(scaleOrbit, 100); });
+if(document.fonts && document.fonts.ready){ document.fonts.ready.then(scaleOrbit); }
+setTimeout(scaleOrbit, 300);
+setTimeout(scaleOrbit, 1000);
 const depthEls = orbitWrap.querySelectorAll('[data-depth]');
 let targetX = 0, targetY = 0, curX = 0, curY = 0;
 
